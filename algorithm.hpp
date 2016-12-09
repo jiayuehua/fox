@@ -1,4 +1,6 @@
 #include <forward_list>
+namespace fox{
+
 template <class Container, class Iter>
 Iter eraseViaSwap(Container& c, Iter i) noexcept
 {
@@ -36,3 +38,7 @@ std::size_t size(const std::forward_list<U> & fla)noexcept
 {
   return std::distance(fla.begin(), fla.end());
 }
+
+
+}//namespace fox
+
