@@ -29,11 +29,9 @@ int base64Decode(unsigned char* In, int inLen, unsigned char* Out, int* pOutLen)
 
 enum
 {
-  Base64TextMaxLen = 64,
-  KeyLen = 32,
-  PlainTextMaxlen = 128,
   IVLen=16
 };
+  //keyLen == 32 Byte
 int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
   unsigned char *plaintext)
 {
@@ -73,35 +71,4 @@ int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
 
   return plaintext_len;
 }
-
-int getPrice(const char* base64txt, const char* k ,  unsigned char * plainText)
-{
-  int plainLen = 0;
-  unsigned char base64text[Base64TextMaxLen];
-  unsigned char key[KeyLen];
-  std::memset(key, 0, sizeof(key));
-  unsigned char cipher[Base64TextMaxLen];
-  int base64textlen, cipherlen;
-  int len;
-  std::snprintf((char*)base64text, sizeof(base64text), "%s\n%n", base64txt, &base64textlen);
-  std::memcpy(key, k, std::max(static_cast<std::size_t>(KeyLen), strlen(k)));
-  base64Decode(base64text, base64textlen, cipher, &cipherlen);
-  plainLen = decrypt(cipher, cipherlen, key, plainText);
-  plainText[plainLen] = 0;
-  return plainLen;
-}
-
-int main(int argc, char** argv)
-{
-  if (argc<3)
-  {
-    std::printf("usage: ./a.out base64Str Token");
-    return 1;
-  }
-  unsigned char plainText[PlainTextMaxlen];
-  int plainlen = getPrice(argv[1], argv[2], plainText);
-  plainText[plainlen] = 0;
-  std::cout << plainText<<std::endl;
-}
-
 
