@@ -1,20 +1,21 @@
-#pragma once
+#pragma once		
 #include <thread>
 namespace fox {
   enum ThreadWaitWay{
      Join,
      Detach,
-  };
+  };            
   class Thread final {
     ThreadWaitWay way;
     std::thread t1;
   public:
+  
     template <typename... T>
-    Thread(ThreadWaitWay w, T... var) :way(w), t1(std::forward<T>(var)...)
+    Thread(ThreadWaitWay w, T&&... var) :way(w), t1(std::forward<T>(var)...)
     {
     }
     template <typename... T>
-    Thread(T... var) : Thread(ThreadWaitWay::Join, std::forward<T>(var)...)
+    Thread(T&&... var) : Thread(ThreadWaitWay::Join, std::forward<T>(var)...)
     {
     }
     Thread(const Thread&) = delete;
