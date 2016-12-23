@@ -1,6 +1,10 @@
 #pragma once
 #include <thread>
 namespace fox {
+  enum ThreadWaitWay{
+     Join,
+     Detach,
+  };
   class Thread final {
     ThreadWaitWay way;
     std::thread t1;
