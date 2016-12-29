@@ -11,10 +11,11 @@ fox:: GeneralMutex < fox :: Recursive, fox :: Timed > // can use as std::recursi
 fox:: GeneralMutex < fox :: Timed , fox :: Recursive> // the same
 
 
-fox:: GeneralMutex< fox:: timed, fox:: Shared>  // std::shared_timed_mutex
+fox:: GeneralMutex< fox:: Timed, fox:: Shared>  // std::shared_timed_mutex
 
-fox:: GeneralMutex< fox:: timed, fox:: NotResursive, fox:: Shared>  // the same
+fox:: GeneralMutex< fox:: Timed, fox:: NotResursive, fox:: Shared>  // the same
 
 
-Three policy are supported, timed, recursive and shared. You can provide the policy is any order.
+Three policy are supported: timed, recursive and shared. You
+can provide the policy instance is any order.
 
