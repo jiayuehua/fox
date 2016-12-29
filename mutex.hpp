@@ -1,6 +1,6 @@
 #pragma once
 #include <mutex>
-//#include <shared_mutex>
+#include <shared_mutex>
 #include <boost/parameter.hpp>
 #include <boost/mpl/arg.hpp>
 #include <boost/parameter/name.hpp>
@@ -54,12 +54,12 @@ namespace fox {
   template<>
   class Mutex<Recursive, Timed, NotShared> : public std::recursive_timed_mutex {
   };
-  //template<>
-  //class Mutex<NotRecursive, NotTimed, Shared> : public std::shared_mutex {
-  //};
-  //template<>
-  //class Mutex<NotRecursive, Timed, Shared> : public std::shared_timed_mutex {
-  //};
+  template<>
+  class Mutex<NotRecursive, NotTimed, Shared> : public std::shared_mutex {
+  };
+  template<>
+  class Mutex<NotRecursive, Timed, Shared> : public std::shared_timed_mutex {
+  };
   namespace parameter = boost::parameter;
   typedef parameter::parameters<
     parameter::optional<parameter::deduced<tag::RecursiveType>, boost::is_base_and_derived<RecursiveWay, _>>
@@ -77,7 +77,6 @@ namespace fox {
       class_signature::bind<A0, A1, A2>::type
       args;
 
-    // Extract first logical parameter.
     typedef typename parameter::value_type<
       args, tag::RecursiveType, NotRecursive >::type RecursiveType;
 
