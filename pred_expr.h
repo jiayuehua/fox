@@ -51,45 +51,19 @@ using truthiness = std::conditional_t<c, std::true_type, std::false_type>;
 // Quick check to see if a series of zero or more bools all evaluate to true.
 //
 template <bool... bs>
-struct AllTrue;
-
-template <bool b, bool... bs>
-struct AllTrue<b, bs...> {
-  enum : bool { value = b && AllTrue<bs...>::value };
-};
-
-template <>
-struct AllTrue<> {
-  enum : bool { value = true };
+struct AllTrue
+{
+  static constexpr auto value = (bs&&...);
 };
 
 //
 // See if each Ts is derived from Base.
 //
-template <typename Base, typename... Ts>
-struct all_derived_from;
+//template <typename Base, typename... Ts>
+//using all_derived_from = AllTrue<std::is_base_of<Base,Ts>::value...>;
 
-template <typename Base, typename F, typename... Rs>
-struct all_derived_from<Base, F, Rs...> {
-  enum : bool { value = std::is_base_of<Base, F>::value && all_derived_from<Base, Rs...>::value };
-};
-
-template <typename Base>
-struct all_derived_from<Base> {
-  enum : bool { value = true };
-};
-
-//
-// Every AST node is-a "Predicate AST"
-//
 struct PAST {
 };
-
-//
-// Check that all are derived from PAST.
-//
-// template <typename... Ts>
-// using AllPAst = all_derived_from<PAST, Ts...>;
 
 template <class T>
 struct IsTraits {
@@ -106,7 +80,9 @@ using TraitsType = typename IsTraits<std::remove_cv_t<T>>::type;
 template <class T>
 constexpr bool isTraits = is_detected<TraitsType, T>::value;
 template <typename... T>
-using AllPAst = AllTrue<(isTraits<T> || std::is_base_of<PAST, T>::value)...>;
+using AllPAstImpl = AllTrue<(isTraits<T> || std::is_base_of<PAST, T>::value)...>;
+template <typename... T>
+using AllPAst = std::enable_if_t<AllPAstImpl<T...>::value, void**>;
 //
 // The language consists of type predicate leaves
 // the binary operators &, |, and ^ (and, or, and exclusive or),
@@ -154,7 +130,7 @@ struct BindT1st : PAST {
     return b(f, s);
   }
 };
-template <class BPred, typename First, typename = AllPAst<BPred>>
+template <class BPred, typename First,  AllPAst<BPred> = nullptr>
 constexpr auto bind1st(BPred, First)
 {
   return BindT1st<BPred, First>();
@@ -169,7 +145,7 @@ struct BindT2nd : PAST {
     return b(f, s);
   }
 };
-template <class BPred, typename Second, typename = AllPAst<BPred>>
+template <class BPred, typename Second, AllPAst<BPred> = nullptr>
 constexpr auto bind2nd(BPred, Second)
 {
   return BindT2nd<BPred, Second>();
@@ -188,7 +164,7 @@ struct And : PAST {
     return p1(t)&p2(t);
   }
 };
-template <typename P1, typename P2, typename = AllPAst<P1, P2>>
+template <typename P1, typename P2, AllPAst<P1, P2> = nullptr>
 constexpr auto operator&(P1, P2)
 {
   And<P1, P2> a = {};
@@ -205,7 +181,7 @@ struct Or : PAST {
     return p1(t)|p2(t);
   }
 };
-template <typename P1, typename P2, typename = AllPAst<P1, P2>>
+template <typename P1, typename P2, AllPAst<P1, P2> = nullptr>
 constexpr auto operator|(P1, P2)
 {
   Or<P1, P2> a = {};
@@ -221,7 +197,7 @@ struct Xor : PAST {
     return p1(t)^p2(t);
   }
 };
-template <typename P1, typename P2, typename = AllPAst<P1, P2>>
+template <typename P1, typename P2, AllPAst<P1, P2> = nullptr>
 constexpr auto operator^(P1, P2)
 {
   Xor<P1, P2> a = {};
@@ -229,14 +205,14 @@ constexpr auto operator^(P1, P2)
 }
 template <typename P>
 struct Not : PAST {
-  template<class T, typename = AllPAst<P> >
+  template<class T, AllPAst<P> = nullptr >
   constexpr bool operator()(T t)const
   {
     P p = {};
     return p(t)?0:1;
   }
 };
-template <typename P, typename = AllPAst<P>>
+template <typename P, AllPAst<P> = nullptr>
 constexpr auto operator!(P)
 {
   return Not<P>();
@@ -252,7 +228,7 @@ constexpr auto operator!(P)
 // Can also check multiple arguments against the constraint:
 //    satisfies<T1, T2, T3>(ast)
 //
-template <typename... Ts, typename AST, typename = AllPAst<AST>>
+template <typename... Ts, typename AST, AllPAst<AST> = nullptr>
 constexpr bool satisfies(AST)
 {
   return AllTrue<AST()(hana::type_c<Ts>)...>::value;
