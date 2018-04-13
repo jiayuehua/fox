@@ -144,12 +144,37 @@ constexpr auto pred()
   return Id<Pred>();
 }
 
-// Operators used to build the compile-time AST.
-// We overload the bitwise operators &, |, and ^ rather than
-// && and || so that we can have an ^ operation and also so as
-// not to imply that the operators will short-circuit.
-// We use ! for negation rather than ~, however.
-//
+template < class BPred, typename First>
+struct BindT1st : PAST {
+  template <typename Second>
+  constexpr bool operator()(Second s)const
+  {
+    BPred b = {};
+    First f = {};
+    return b(f, s);
+  }
+};
+template <class BPred, typename First, typename = AllPAst<BPred>>
+constexpr auto bind1st(BPred, First)
+{
+  return BindT1st<BPred, First>();
+}
+template < class BPred, typename Second>
+struct BindT2nd : PAST {
+  template <typename First>
+  constexpr bool operator()(First f)const
+  {
+    BPred b = {};
+    Second s = {};
+    return b(f, s);
+  }
+};
+template <class BPred, typename Second, typename = AllPAst<BPred>>
+constexpr auto bind2nd(BPred, Second)
+{
+  return BindT2nd<BPred, Second>();
+}
+
 namespace detail {
 struct Base{};
 
